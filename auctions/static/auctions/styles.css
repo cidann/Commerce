@@ -1,0 +1,21 @@
+body {
+    padding: 10px;
+}
+.card{
+    margin: 15px auto 15px;
+    height: 300px;
+}
+
+#imagewrap{
+    display: flex;
+    float: left;
+    max-width: 25%;
+    max-height: 100%;
+}
+
+#textwrap{
+    margin-left: 10px;
+    float: left;
+    max-width: 25%;
+    max-height: 100%;
+}

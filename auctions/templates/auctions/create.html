@@ -1,0 +1,32 @@
+{% extends "auctions/layout.html"%}
+
+{%block title%}
+    Create
+{%endblock%}
+
+{%block body%} 
+    <form method="post" action="{%url "create"%}">
+        {%csrf_token%}
+        <div class="form-group">
+            <label for="Title">Title</label>
+            <input name="title" type="text" class="form-control" id="Title" placeholder="Title for auction">
+        </div>
+        <div class="form-group">
+            <label for="Description">Textarea</label>
+            <textarea name="description" class="form-control" id="Description" rows="10"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="price">Starting Bid Price</label>
+            <input name="price" type="text" class="form-control" id="price" placeholder="Starting Price for Bid">
+        </div>
+        <div class="form-group">
+            <label for="Image">Item Image URL</label>
+            <input name="image" type="url" class="form-control" id="Image" placeholder="URL for image">
+        </div>
+        <div class="form-group">
+            <label for="Category">Category URL</label>
+            <input name="category" type="url" class="form-control" id="Category" placeholder="URL for category">
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+{%endblock%}
