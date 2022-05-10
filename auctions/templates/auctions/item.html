@@ -6,19 +6,28 @@
 
 {%block body%} 
     <h1>Listing:{{item.title}}</h1>
-    {%if user.is_authenticated%}
-        <form method="post" action="{%url "item" item.id%}">
+    
+    <form method="post" action="{%url "item" item.id%}">
+        {%if user.is_authenticated%}
             {%csrf_token%}
             {%if item in watchlist%} 
                 <button name="watchlist" value="False" type="submit" class="btn btn-primary btn-sm">Remove From Watchlist</button>
             {%else%}
                 <button name="watchlist" value="True" class="btn btn-primary btn-sm">Watchlist</button>
             {%endif%}   
-        </form>
-    {%endif%}
-    {%if item.image%}
-        <div style="height: 300px; "><img src="{{item.image}}" class="img-fluid"></div>
-    {%endif%}
-    <p>{{item.description}}</p>
-    <h4>${{item.price}}</h4>
+        {%endif%}
+        {%if item.image%}
+            <div style="height: 300px; "><img src="{{item.image}}" class="img-fluid"></div>
+        {%endif%}
+        <p>{{item.description}}</p>
+        <h4>${{item.price.price}}</h4>
+        <h4>{{message}}</h4>
+        <small>{{item.price.id}} bid(s) so far</small>
+        {%if user.is_authenticated%}
+            <input name=bid class="form-control" type="text" placeholder="Bid">
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-primary">Place Bid</button>
+            </div>
+        {%endif%}
+    </form>
 {%endblock%}
