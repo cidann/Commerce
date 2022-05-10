@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from _datetime import datetime
+from datetime import datetime
 from .models import User,Auctions
 
 
@@ -64,13 +64,29 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def create(request):
-    if request.method=="POST":
+    if request.method=="POST" and request.user.is_authenticated:
+        user=request.user
         title=request.POST["title"]
         description=request.POST["description"]
         price=request.POST["price"]
         image=request.POST["image"]
         category=request.POST["category"]
         time=datetime.now()
-        Auctions(title=title,description=description,price=price,image=image,time=time,category=category).save()
+        auction=Auctions(title=title,description=description,price=price,image=image,time=time,category=category)
+        auction.save()
+        auction.owner.add(user)
     return render(request,"auctions/create.html")
 
+def item(request, item_id):
+    item=Auctions.objects.get(id=item_id)
+    if request.method=="POST":
+        watchlist=request.POST["watchlist"]
+        if watchlist=="True":
+            request.user.watchlist.add(item)
+        else:
+            request.user.watchlist.remove(item)
+        return HttpResponseRedirect(reverse("item",args=[item_id]))
+    return render(request,"auctions/item.html",{"item":item,"watchlist":request.user.watchlist.all()})
+
+def watchlist(request):
+    return render(request,"auctions/watchlist.html",{"watchlist":request.user.watchlist.all()})
