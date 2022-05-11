@@ -4,11 +4,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from datetime import datetime
-from .models import User,Auctions,Bid
+from .models import User,Auctions,Bid,Comments
 
 
 def index(request):
-    items=Auctions.objects.all()
+    items=Auctions.objects.filter(status="open")
     return render(request, "auctions/index.html",{"items":items})
 
 
@@ -73,32 +73,46 @@ def create(request):
         time=datetime.now()
         bid = request.POST["bid"]
         bid=Bid(id=0,price=bid,bider=user)
-        bid.save()
         auction=Auctions(title=title,description=description,price=bid,image=image,time=time,category=category)
+        bid.item=auction
         auction.save()
+        bid.save()
         auction.owner.add(user)
     return render(request,"auctions/create.html")
 
 def item(request, item_id):
     item=Auctions.objects.get(id=item_id)
     if request.method=="POST":
-        watchlist=request.POST["watchlist"]
-        bid=request.POST["bid"]
-        if watchlist:
-            if watchlist=="True":
-                request.user.watchlist.add(item)
-            else:
-                request.user.watchlist.remove(item)
-        if bid:
+        action=request.POST["action"]
+        if action=="addwatch":
+            request.user.watchlist.add(item)
+        elif action=="removewatch":
+            request.user.watchlist.remove(item)
+        elif action=="close":
+            item.status="close"
+            item.save()
+        elif action=="bid":
+            bid = request.POST["bid"]
             if float(bid)>item.price.price:
-                bid=Bid(price=bid,bider=request.user)
+                bid=Bid(price=bid,bider=request.user,item=item)
                 bid.save()
                 item.price=bid
                 item.save()
             else:
                 return HttpResponse("Bids must be at least higher than current price")
+        elif action=="comment":
+            comment=request.POST["comment"]
+            comment=Comments(text=comment,user=request.user,item=item)
+            comment.save()
+        elif action=="":
+            return HttpResponse("{action}")
         return HttpResponseRedirect(reverse("item",args=[item_id]))
-    return render(request,"auctions/item.html",{"item":item,"watchlist":request.user.watchlist.all()})
+    return render(request,"auctions/item.html",
+                  {"bid":Bid.objects.filter(item=item),
+                    "item":item,
+                   "watchlist":request.user.watchlist.all(),
+                   "comments":item.comment.reverse()
+                   })
 
 def watchlist(request):
     return render(request,"auctions/watchlist.html",{"watchlist":request.user.watchlist.all()})

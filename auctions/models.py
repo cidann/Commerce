@@ -9,6 +9,7 @@ class Auctions(models.Model):
     image=models.URLField()
     time=models.TimeField()
     category=models.URLField()
+    status=models.CharField(max_length=64,default="open")
 
 class User(AbstractUser):
     own=models.ManyToManyField(Auctions,blank=True,related_name="owner")
@@ -17,4 +18,11 @@ class User(AbstractUser):
 class Bid(models.Model):
     price=models.FloatField()
     bider=models.ForeignKey(User,on_delete=models.CASCADE)
+    item=models.ForeignKey(Auctions,on_delete=models.CASCADE)
 
+class Comments(models.Model):
+    text=models.TextField()
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="comment")
+    item=models.ForeignKey(Auctions,on_delete=models.CASCADE,related_name="comment")
+    def __str__(self):
+        return f"{self.user.username}: {self.text}"
