@@ -9,10 +9,14 @@ class Auctions(models.Model):
     time=models.TimeField()
     category=models.ForeignKey("Categories",on_delete=models.SET_NULL,blank=True,null=True,related_name="item")
     status=models.CharField(max_length=64,default="open")
+    def __str__(self):
+        return self.title
 
 class User(AbstractUser):
     own=models.ManyToManyField(Auctions,blank=True,null=True,related_name="owner")
     watchlist = models.ManyToManyField(Auctions,blank=True,null=True, related_name="watchlist")
+    def __str__(self):
+        return self.username
 
 class Bid(models.Model):
     price=models.FloatField()
