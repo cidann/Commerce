@@ -9,7 +9,7 @@
     {%if item.status == "close"%}
         <h1>
             Listing Closed
-            {%if item.price.bider == user%}
+            {%if item.price.last.bider == user%}
                 You Won The Bid
             {%endif%}
         </h1>          
@@ -38,7 +38,7 @@
     <form method="post" action="{%url "item" item.id%}">
         {%csrf_token%}
         <p>{{item.description}}</p>
-        <h4>${{item.price.price}}</h4>
+        <h4>${{item.price.last}}</h4>
         <h4>{{message}}</h4>
         <small>{{bid.count}} bid(s) so far</small>
         {%if user.is_authenticated and item.status != "close"%}
@@ -58,9 +58,9 @@
             <li>Category: No Category Listed</li>
         {%endif%}
         {%if item.status == "close"%}
-            <li>Bid Won by: {{item.price.bider}}</li>
+            <li>Bid Won by: {{item.price.last.bider}}</li>
         {%else%}
-            <li>Highest bider: {{item.price.bider}}</li>
+            <li>Highest bider: {{item.price.last.bider}}</li>
         {%endif%}
     </ul>
     

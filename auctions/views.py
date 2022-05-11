@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from datetime import datetime
-from .models import User,Auctions,Bid,Comments
+from .models import User,Auctions,Bid,Comments,Categories
 
 
 def index(request):
@@ -69,13 +69,17 @@ def create(request):
         title=request.POST["title"]
         description=request.POST["description"]
         image=request.POST["image"]
-        category=request.POST["category"]
+        category=request.POST["category"].capitalize()
+        try:
+            category=Categories.objects.get(category=category)
+        except:
+            category=Categories(category=category)
+            category.save()
         time=datetime.now()
-        bid = request.POST["bid"]
-        bid=Bid(id=0,price=bid,bider=user)
-        auction=Auctions(title=title,description=description,price=bid,image=image,time=time,category=category)
-        bid.item=auction
+        auction = Auctions(title=title, description=description, image=image, time=time, category=category)
         auction.save()
+        bid = request.POST["bid"]
+        bid=Bid(price=bid,bider=user,item=auction)
         bid.save()
         auction.owner.add(user)
     return render(request,"auctions/create.html")
@@ -93,10 +97,10 @@ def item(request, item_id):
             item.save()
         elif action=="bid":
             bid = request.POST["bid"]
-            if float(bid)>item.price.price:
+            if float(bid)>item.price.last().price:
                 bid=Bid(price=bid,bider=request.user,item=item)
                 bid.save()
-                item.price=bid
+                item.price.add(bid)
                 item.save()
             else:
                 return HttpResponse("Bids must be at least higher than current price")
@@ -116,3 +120,9 @@ def item(request, item_id):
 
 def watchlist(request):
     return render(request,"auctions/watchlist.html",{"watchlist":request.user.watchlist.all()})
+
+def categories(request):
+    return render(request,"auctions/categories.html",{"categories":Categories.objects.all()})
+
+def category(request,category):
+    return render(request,"auctions/category.html",{"items":Categories.objects.get(category=category).item.all()})
