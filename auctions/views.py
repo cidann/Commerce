@@ -111,12 +111,13 @@ def item(request, item_id):
         elif action=="":
             return HttpResponse("{action}")
         return HttpResponseRedirect(reverse("item",args=[item_id]))
-    return render(request,"auctions/item.html",
-                  {"bid":Bid.objects.filter(item=item),
+    context={"bid":Bid.objects.filter(item=item),
                     "item":item,
-                   "watchlist":request.user.watchlist.all(),
                    "comments":item.comment.reverse()
-                   })
+    }
+    if(request.user.is_authenticated):
+        context['watchlist']=request.user.watchlist.all()
+    return render(request,"auctions/item.html",context)
 
 def watchlist(request):
     return render(request,"auctions/watchlist.html",{"watchlist":request.user.watchlist.all()})
